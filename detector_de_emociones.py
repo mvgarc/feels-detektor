@@ -39,6 +39,8 @@ webcam.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
 webcam.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 
 frame_count = 0
+last_faces = []
+last_labels = []
 
 try:
     while True:
@@ -49,35 +51,51 @@ try:
         frame_count += 1
         display_frame = frame.copy()
 
-        # Procesar solo cada 2 frames
-        if frame_count % 2 == 0:
+        # -------------------------------
+        # Procesar solo cada 3 frames
+        # -------------------------------
+        if frame_count % 3 == 0:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4, minSize=(30,30))
+            faces = face_cascade.detectMultiScale(
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=4,
+                minSize=(30, 30)
+            )
+            last_faces = faces
+            last_labels = []
 
             for (x, y, w, h) in faces:
                 face_img = gray[y:y+h, x:x+w]
-                cv2.rectangle(display_frame, (x, y), (x+w, y+h), (255,0,0), 2)
-
                 try:
                     face_img_resized = cv2.resize(face_img, (48,48))
                     img_features = extract_features(face_img_resized)
-                    pred = model.predict(img_features)
+                    pred = model.predict(img_features, verbose=0)
                     prediction_label = labels[pred.argmax()]
-                    cv2.putText(display_frame, prediction_label, (x, y-10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
-                except Exception as e:
-                    print("Error procesando la cara:", e)
-                    continue
+                    last_labels.append(prediction_label)
+                except:
+                    last_labels.append("")
 
+        # -------------------------------
+        # Dibujar rectángulos y etiquetas
+        # -------------------------------
+        for i, (x, y, w, h) in enumerate(last_faces):
+            cv2.rectangle(display_frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+            if i < len(last_labels):
+                cv2.putText(display_frame, last_labels[i], (x, y-10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+
+        # -------------------------------
+        # Mostrar ventana
+        # -------------------------------
         cv2.imshow("Emotion Detector", display_frame)
 
         # -------------------------------
-        # Salida con 'q' o cerrando la ventana
+        # Salir con 'q' o cerrando la ventana
         # -------------------------------
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             break
-        # Detectar si la ventana fue cerrada (solo en Windows con OpenCV >= 4.5)
         if cv2.getWindowProperty("Emotion Detector", cv2.WND_PROP_VISIBLE) < 1:
             break
 
