@@ -35,8 +35,12 @@ labels = {0: 'angry', 1: 'disgust', 2: 'fear', 3: 'happy',
 # Inicializar webcam
 # -------------------------------
 webcam = cv2.VideoCapture(0)
-webcam.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-webcam.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+webcam.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+webcam.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+# Configurar ventana grande y redimensionable
+cv2.namedWindow("Emotion Detector", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("Emotion Detector", 800, 600)
 
 frame_count = 0
 last_faces = []
