@@ -106,3 +106,6 @@ try:
 finally:
     webcam.release()
     cv2.destroyAllWindows()
+
+#source C:/Users/valen/Documents/proyecto=feels/feels-detektor/.venv/Scripts/activate
+#python detector_de_emociones.py
